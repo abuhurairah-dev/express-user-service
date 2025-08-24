@@ -1,32 +1,49 @@
 const bcrypt = require("bcryptjs");
 const User = require("../models/User");
-const logger = require("../utils/logger");
 
 class UserService {
-  // Register new user
   static async registerUser({ name, email, password }) {
-    try {
-      const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        throw new Error("User with this email already exists");
-      }
-
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-
-      const newUser = new User({
-        name,
-        email,
-        password: hashedPassword,
-      });
-      await newUser.save();
-
-      logger.info(`✅ User registered: ${email}`);
-      return { id: newUser._id, email: newUser.email, name: newUser.name };
-    } catch (error) {
-      logger.error(`❌ Error registering user: ${error.message}`);
-      throw error;
+    if (!name) {
+      const err = new Error("Name is required");
+      err.statusCode = 400;
+      throw err;
     }
+    if (name.length < 2) {
+      const err = new Error("Name must be at least 2 characters long");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!email) {
+      const err = new Error("Email is required");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      const err = new Error("Please use a valid email address");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (!password) {
+      const err = new Error("Password is required");
+      err.statusCode = 400;
+      throw err;
+    }
+    if (password.length < 6) {
+      const err = new Error("Password must be at least 6 characters long");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    const existing = await User.findOne({ email });
+    if (existing) {
+      const err = new Error("User with this email already exists");
+      err.statusCode = 409;
+      throw err;
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password: hashedPassword });
+    return user.save();
   }
 }
 
