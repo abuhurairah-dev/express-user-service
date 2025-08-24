@@ -3,18 +3,21 @@ const express = require("express");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 
-const { logger, stream } = require("./utils/logger");
+const logger = require("./utils/logger");
 const config = require("./config");
 const errorHandler = require("./middleware/errorHandler");
+const userRoutes = require("./routes/userRoutes");
 
 const app = express();
 
 app.use(express.json());
-app.use(morgan("combined", { stream }));
+app.use(morgan("combined", { stream: logger.stream }));
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", message: "Service is running 🚀" });
 });
+
+app.use("/api/users", userRoutes);
 
 app.use(errorHandler);
 
