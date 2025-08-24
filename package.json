@@ -4,7 +4,7 @@
   "description": "A reusable Express.js and MongoDB based user management library with authentication, error handling, and logging. Designed for easy integration into any Node.js application.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "cross-env NODE_ENV=test jest --runInBand --detectOpenHandles",
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
@@ -28,5 +28,11 @@
     "mongoose": "^8.18.0",
     "morgan": "^1.10.1",
     "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.0.0",
+    "jest": "^30.0.5",
+    "mongodb-memory-server": "^10.2.0",
+    "supertest": "^7.1.4"
   }
 }
