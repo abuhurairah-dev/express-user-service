@@ -42,8 +42,8 @@ class UserService {
       throw err;
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashedPassword });
+    // pass plain password, let schema handle hashing
+    const user = new User({ name, email, password });
     return user.save();
   }
 
