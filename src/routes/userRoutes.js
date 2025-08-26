@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const UserService = require("../services/userService");
+const authMiddleware = require("../middleware/authMiddleware")
 
 // Register route
 router.post("/register", async (req, res, next) => {
@@ -28,6 +29,19 @@ router.post("/login", async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// Profile route
+router.get("/me", authMiddleware, async (req, res) => {
+  try {
+    const user = await UserService.getProfile(req.userId);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message,
+    });
   }
 });
 
