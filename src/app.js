@@ -12,4 +12,14 @@ app.use("/api/users", userRoutes);
 
 app.use(errorHandler);
 
+// Comment out for local testing
+// const UserService = require("../src/services/userService");
+
+// // For testing (console logging instead of sending real email)
+// UserService.configure({
+//   sendEmail: async ({ to, subject, html }) => {
+//     console.log("📧 FAKE EMAIL:", { to, subject, html });
+//   },
+// });
+
 module.exports = app;
