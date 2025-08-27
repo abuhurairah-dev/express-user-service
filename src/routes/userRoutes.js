@@ -45,4 +45,31 @@ router.get("/me", authMiddleware, async (req, res) => {
   }
 });
 
+// Forgot Password (request reset)
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;   // ✅ extract email
+    const result = await UserService.requestPasswordReset(email);
+    res.json(result);
+  } catch (err) {
+    res.status(err.statusCode || 500).json({ success: false, message: err.message });
+  }
+});
+
+// Reset Password
+router.post("/reset-password/:token", async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    const result = await UserService.resetPassword({ token, newPassword });
+    res.json({ success: true, ...result });
+  } catch (err) {
+    res.status(err.statusCode || 500).json({
+      success: false,
+      message: err.message,
+    });
+  }
+});
+
 module.exports = router;
