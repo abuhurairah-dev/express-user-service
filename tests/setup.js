@@ -1,23 +1,38 @@
-const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
+const mongoose = require("mongoose");
+const request = require("supertest");
+const { UserService, userRoutes } = require("../index");
+const express = require("express");
 
-let mongo;
+let mongod;
+let app;
 
-module.exports.connect = async () => {
-  mongo = await MongoMemoryServer.create();
-  const uri = mongo.getUri();
-  await mongoose.connect(uri);
+// ✅ Mock email provider
+const fakeEmailProvider = {
+  sendMail: jest.fn().mockResolvedValue(true),
 };
 
-module.exports.closeDatabase = async () => {
-  await mongoose.connection.dropDatabase();
+beforeAll(async () => {
+  mongod = await MongoMemoryServer.create();
+  const uri = mongod.getUri();
+
+  // ✅ Configure UserService once for tests
+  UserService.configure({
+    dbUri: uri,
+    jwtSecret: "testsecret",
+    emailProvider: fakeEmailProvider,
+  });
+
+  // ✅ Build app with user routes
+  app = express();
+  app.use(express.json());
+  app.use("/api/users", userRoutes);
+
+  // ✅ Expose testRequest globally
+  global.testRequest = () => request(app);
+});
+
+afterAll(async () => {
   await mongoose.connection.close();
-  if (mongo) await mongo.stop();
-};
-
-module.exports.clearDatabase = async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany();
-  }
-};
+  await mongod.stop();
+});
