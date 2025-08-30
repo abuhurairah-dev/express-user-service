@@ -1,50 +1,27 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcryptjs");
 
-const userSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: [true, "Name is required"],
-      minlength: [2, "Name must be at least 2 characters long"],
-    },
-    email: {
-      type: String,
-      required: [true, "Email is required"],
-      unique: true,
-      match: [/^\S+@\S+\.\S+$/, "Please use a valid email address"],
-    },
-    password: {
-      type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters long"],
-    },
-    passwordResetToken: { type: String },
-    passwordResetExpires: { type: Date },
-  },
-  { timestamps: true }
-);
+let UserModel;
 
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (err) {
-    next(err);
-  }
-});
-
-userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+/** Base schema with default fields */
+const baseFields = {
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  passwordResetToken: { type: String },
+  passwordResetExpires: { type: Date },
 };
 
-userSchema.methods.toJSON = function () {
-  const obj = this.toObject();
-  delete obj.password;
-  return obj;
-};
+/** Factory for creating the User model with schema extension */
+function createUserModel(extensionFields = {}) {
+  if (UserModel) return UserModel; // avoid redefining
 
-const User = mongoose.model("User", userSchema);
-module.exports = User;
+  const schema = new mongoose.Schema({
+    ...baseFields,
+    ...extensionFields,
+  });
+
+  UserModel = mongoose.models.User || mongoose.model("User", schema);
+  return UserModel;
+}
+
+module.exports = { createUserModel };
