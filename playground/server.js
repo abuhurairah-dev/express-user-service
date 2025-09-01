@@ -16,6 +16,11 @@ app.use(express.json());
           console.log(`📧 [DEV-EMAIL] to=${to}, subject=${subject}, text=${text}`);
         },
       },
+      userSchemaExtension: {
+        // Note: Add cutome fields for registration other than email, name, and password
+        username: { type: String, minlength: [2, "Name must be at least 2 characters long"] },
+        age: { type: Number, min: 0 },
+      },
     });
 
     // mount routes
