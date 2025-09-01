@@ -21,6 +21,7 @@ app.use(express.json());
         username: { type: String, minlength: [2, "Name must be at least 2 characters long"] },
         age: { type: Number, min: 0 },
       },
+      collectionName: "Member",  // consumer chooses table/collection
     });
 
     // mount routes

@@ -20,6 +20,7 @@ class UserService {
     dbUri,
     dbConnection,
     userSchemaExtension,
+    collectionName = "User",
   }) {
     try {
       if (!jwtSecret) throw new Error("JWT secret is required");
@@ -43,9 +44,9 @@ class UserService {
       UserService.jwtSecret = jwtSecret;
       UserService.jwtExpiresIn = jwtExpiresIn;
       UserService.emailProvider = emailProvider;
-      UserService.User = createUserModel(userSchemaExtension);
+      UserService.User = createUserModel(userSchemaExtension, collectionName);
 
-      logger.info("✅ UserService configured successfully");
+      logger.info(`✅ UserService configured successfully with collection: ${collectionName}`);
     } catch (err) {
       logger.error("❌ Failed to configure UserService", err);
       throw err;

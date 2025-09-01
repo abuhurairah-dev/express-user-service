@@ -17,6 +17,8 @@ const schemaExtension = {
   age: { type: Number, min: 0 },
 }
 
+const collectionName = "Customer";
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
@@ -27,6 +29,7 @@ beforeAll(async () => {
     jwtSecret: "testsecret",
     emailProvider: fakeEmailProvider,
     userSchemaExtension: schemaExtension,
+    collectionName: collectionName,
   });
 
   // ✅ Build app with user routes

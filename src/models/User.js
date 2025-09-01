@@ -28,7 +28,7 @@ const baseFields = {
 };
 
 /** Factory for creating the User model with schema extension */
-function createUserModel(extensionFields = {}) {
+function createUserModel(extensionFields = {}, collectionName = "User") {
   if (UserModel) return UserModel; // avoid redefining
 
   const schema = new mongoose.Schema({
@@ -36,7 +36,7 @@ function createUserModel(extensionFields = {}) {
     ...extensionFields,
   }, { timestamps: true });
 
-  UserModel = mongoose.models.User || mongoose.model("User", schema);
+  UserModel = mongoose.models[collectionName] || mongoose.model(collectionName, schema);
   return UserModel;
 }
 
