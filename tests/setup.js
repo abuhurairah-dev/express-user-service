@@ -12,6 +12,11 @@ const fakeEmailProvider = {
   sendMail: jest.fn().mockResolvedValue(true),
 };
 
+const schemaExtension = {
+  role: { type: String, default: "user" },
+  age: { type: Number, min: 0 },
+}
+
 beforeAll(async () => {
   mongod = await MongoMemoryServer.create();
   const uri = mongod.getUri();
@@ -21,6 +26,7 @@ beforeAll(async () => {
     dbUri: uri,
     jwtSecret: "testsecret",
     emailProvider: fakeEmailProvider,
+    userSchemaExtension: schemaExtension,
   });
 
   // ✅ Build app with user routes
