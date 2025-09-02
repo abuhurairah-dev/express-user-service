@@ -25,6 +25,11 @@ const baseFields = {
   },
   passwordResetToken: { type: String },
   passwordResetExpires: { type: Date },
+  roles: {
+    type: [String],
+    enum: ["user", "admin"], // consumer can override via schema extension
+    default: "user"
+  },
 };
 
 /** Factory for creating the User model with schema extension */

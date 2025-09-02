@@ -1,6 +1,7 @@
 const express = require("express");
 const UserService = require("../services/userService");
 const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
 const router = express.Router();
 
@@ -62,5 +63,24 @@ router.post("/reset-password", async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 });
+
+/** Dashboard */
+router.get(
+  "/admin/dashboard",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  (req, res) => {
+    res.json({ message: `Welcome Admin ${req.user.name}` });
+  }
+);
+
+router.get(
+  "/trainer/resources",
+  authMiddleware,
+  roleMiddleware(["trainer"]),
+  (req, res) => {
+    res.json({ message: `Trainer access granted to ${req.user.name}` });
+  }
+);
 
 module.exports = router;

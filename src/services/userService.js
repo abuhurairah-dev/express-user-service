@@ -64,7 +64,7 @@ class UserService {
   }
 
   /** Register a new user */
-  static async register({ name, email, password, ...rest }) {
+  static async register({ name, email, password, roles = ["user"], ...rest }) {
     if (!name || name.length < 2) {
       throw new Error("Name must be at least 2 characters long");
     }
@@ -86,6 +86,7 @@ class UserService {
       name,
       email,
       password: hashedPassword,
+      roles,
       ...rest,
     });
 
@@ -193,6 +194,12 @@ class UserService {
 
     logger.info(`Password successfully reset for user: ${user.email}`);
     return true;
+  }
+
+  /** Helper: check if user has required role(s) */
+  static hasRole(user, requiredRoles = []) {
+    if (!user.roles || !Array.isArray(user.roles)) return false;
+    return requiredRoles.some(role => user.roles.includes(role));
   }
 }
 
