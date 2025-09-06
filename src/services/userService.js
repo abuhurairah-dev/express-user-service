@@ -64,7 +64,7 @@ class UserService {
   }
 
   /** Register a new user */
-  static async register({ name, email, password, ...rest }) {
+  static async register({ name, email, password, roles = ["user"], ...rest }) {
     if (!name || name.length < 2) {
       throw new Error("Name must be at least 2 characters long");
     }
@@ -86,6 +86,7 @@ class UserService {
       name,
       email,
       password: hashedPassword,
+      roles,
       ...rest,
     });
 
@@ -193,6 +194,36 @@ class UserService {
 
     logger.info(`Password successfully reset for user: ${user.email}`);
     return true;
+  }
+
+  /** Helper: check if user has required role(s) */
+  static hasRole(user, requiredRoles = []) {
+    if (!user.roles || !Array.isArray(user.roles)) return false;
+    return requiredRoles.some(role => user.roles.includes(role));
+  }
+
+  /** Get all users with pagination (Admin only) */
+  static async getAllUsers({ page = 1, limit = 10 }) {
+    page = Math.max(1, parseInt(page, 10));
+    limit = Math.min(100, Math.max(1, parseInt(limit, 10)));
+
+    const skip = (page - 1) * limit;
+
+    const users = await UserService.User.find({})
+      .select("-password -passwordResetToken -passwordResetExpires")
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalUsers = await UserService.User.estimatedDocumentCount();
+
+    return {
+      page,
+      limit,
+      totalPages: Math.ceil(totalUsers / limit),
+      totalUsers,
+      users,
+    };
   }
 }
 
