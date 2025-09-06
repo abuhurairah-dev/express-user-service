@@ -225,6 +225,40 @@ class UserService {
       users,
     };
   }
+
+  /** Update user profile (self or admin override) */
+  static async updateProfile(userId, updates, isAdmin = false) {
+    // fields that are always restricted
+    const restrictedFields = ["password", "passwordResetToken", "passwordResetExpires", "email"];
+
+    if (!isAdmin) {
+      restrictedFields.push("roles");
+    }
+
+    // filter out restricted fields
+    const safeUpdates = {};
+    for (const [key, value] of Object.entries(updates)) {
+      if (!restrictedFields.includes(key)) {
+        safeUpdates[key] = value;
+      }
+    }
+
+    if (Object.keys(safeUpdates).length === 0) {
+      throw new Error("No valid fields provided for update");
+    }
+
+    const updatedUser = await UserService.User.findByIdAndUpdate(
+      userId,
+      { $set: safeUpdates },
+      { new: true, runValidators: true }
+    ).select("-password -passwordResetToken -passwordResetExpires");
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    return updatedUser;
+  }
 }
 
 module.exports = UserService;

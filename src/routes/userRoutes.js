@@ -79,4 +79,22 @@ router.get(
   }
 );
 
+router.patch(
+  "/me",
+  authMiddleware,
+  async (req, res) => {
+    try {
+      const isAdmin = req.user?.roles?.includes("admin");
+      const updatedUser = await UserService.updateProfile(
+        req.userId,
+        req.body,
+        isAdmin
+      );
+      res.json(updatedUser);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = router;
