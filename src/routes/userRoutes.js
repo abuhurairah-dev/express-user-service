@@ -66,20 +66,16 @@ router.post("/reset-password", async (req, res) => {
 
 /** Dashboard */
 router.get(
-  "/admin/dashboard",
+  "/admin/users",
   authMiddleware,
   roleMiddleware(["admin"]),
-  (req, res) => {
-    res.json({ message: `Welcome Admin ${req.user.name}` });
-  }
-);
-
-router.get(
-  "/trainer/resources",
-  authMiddleware,
-  roleMiddleware(["trainer"]),
-  (req, res) => {
-    res.json({ message: `Trainer access granted to ${req.user.name}` });
+  async (req, res) => {
+    try {
+      const result = await UserService.getAllUsers(req.query);
+      res.json(result);
+    } catch (err) {
+      res.status(500).json({ error: err.message });
+    }
   }
 );
 

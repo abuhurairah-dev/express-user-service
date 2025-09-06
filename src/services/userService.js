@@ -201,6 +201,30 @@ class UserService {
     if (!user.roles || !Array.isArray(user.roles)) return false;
     return requiredRoles.some(role => user.roles.includes(role));
   }
+
+  /** Get all users with pagination (Admin only) */
+  static async getAllUsers({ page = 1, limit = 10 }) {
+    page = Math.max(1, parseInt(page, 10));
+    limit = Math.min(100, Math.max(1, parseInt(limit, 10)));
+
+    const skip = (page - 1) * limit;
+
+    const users = await UserService.User.find({})
+      .select("-password -passwordResetToken -passwordResetExpires")
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    const totalUsers = await UserService.User.estimatedDocumentCount();
+
+    return {
+      page,
+      limit,
+      totalPages: Math.ceil(totalUsers / limit),
+      totalUsers,
+      users,
+    };
+  }
 }
 
 module.exports = UserService;
