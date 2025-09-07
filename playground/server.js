@@ -1,6 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-const { UserService, userRoutes } = require("../index"); // import from your package
+const { UserService, userRoutes, adminRoutes } = require("../index");
 
 const app = express();
 app.use(express.json());
@@ -31,6 +31,7 @@ app.use(express.json());
 
     // mount routes
     app.use("/api", userRoutes);
+    app.use("/api/admin", adminRoutes);
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
