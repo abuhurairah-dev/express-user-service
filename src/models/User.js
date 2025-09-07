@@ -30,6 +30,10 @@ const baseFields = {
     enum: ["user", "admin"], // consumer can override via schema extension
     default: "user"
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 };
 
 /** Factory for creating the User model with schema extension */

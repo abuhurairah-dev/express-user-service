@@ -140,7 +140,7 @@ class UserService {
 
   /** Get current user details */
   static async me(userId) {
-    return UserService.User.findById(userId).select(
+    return UserService.User.findOne({ _id: userId, isDeleted: false }).select(
       "-password -passwordResetToken -passwordResetExpires"
     );
   }
@@ -209,7 +209,7 @@ class UserService {
 
     const skip = (page - 1) * limit;
 
-    const users = await UserService.User.find({})
+    const users = await UserService.User.find({ isDeleted: false })
       .select("-password -passwordResetToken -passwordResetExpires")
       .skip(skip)
       .limit(limit)
@@ -258,6 +258,22 @@ class UserService {
     }
 
     return updatedUser;
+  }
+
+  /** Soft delete a user (Admin only) */
+  static async softDeleteUser(userId) {
+    const user = await UserService.User.findById(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    if (user.isDeleted) {
+      throw new Error("User already deleted");
+    }
+
+    user.isDeleted = true;
+    await user.save();
+
+    return true;
   }
 }
 

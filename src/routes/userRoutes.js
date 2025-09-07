@@ -97,4 +97,18 @@ router.patch(
   }
 );
 
+router.delete(
+  "/admin/users/:id",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  async (req, res) => {
+    try {
+      await UserService.softDeleteUser(req.params.id);
+      res.json({ message: "User deleted successfully" });
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = router;
