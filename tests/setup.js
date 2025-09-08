@@ -1,7 +1,7 @@
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const mongoose = require("mongoose");
 const request = require("supertest");
-const { UserService, userRoutes } = require("../index");
+const { UserService, userRoutes, adminRoutes } = require("../index");
 const express = require("express");
 
 let mongod;
@@ -36,6 +36,7 @@ beforeAll(async () => {
   app = express();
   app.use(express.json());
   app.use("/api/users", userRoutes);
+  app.use("/api/admin", adminRoutes);
 
   // ✅ Expose testRequest globally
   global.testRequest = () => request(app);
