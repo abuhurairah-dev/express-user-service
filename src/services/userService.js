@@ -275,6 +275,44 @@ class UserService {
 
     return true;
   }
+
+  /** Update user roles (Admin only) */
+  static async updateUserRoles(userId, roles) {
+    if (!Array.isArray(roles) || roles.length === 0) {
+      throw new Error("Roles must be a non-empty array");
+    }
+
+    const allowedRoles = UserService.User.schema.path("roles").options.enum;
+    const invalidRoles = roles.filter(r => !allowedRoles.includes(r));
+    if (invalidRoles.length > 0) {
+      throw new Error(`Invalid roles: ${invalidRoles.join(", ")}`);
+    }
+
+    // prevent removing all admins (optional but recommended safeguard)
+    const isRemovingAdmin = !roles.includes("admin");
+    if (isRemovingAdmin) {
+      const adminCount = await UserService.User.countDocuments({
+        roles: "admin",
+        isDeleted: false,
+        _id: { $ne: userId }
+      });
+      if (adminCount === 0) {
+        throw new Error("Cannot remove the last admin user");
+      }
+    }
+
+    const updatedUser = await UserService.User.findByIdAndUpdate(
+      userId,
+      { $set: { roles } },
+      { new: true, runValidators: true }
+    ).select("-password -passwordResetToken -passwordResetExpires");
+
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    return updatedUser;
+  }
 }
 
 module.exports = UserService;
