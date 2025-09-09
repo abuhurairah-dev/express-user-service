@@ -22,7 +22,7 @@ app.use(express.json());
         age: { type: Number, min: 0 },
         roles: {
           type: [String],
-          enum: ["user", "admin", "manager", "trainer"], // Make roles customizable
+          enum: ["manager", "trainer"], // Make roles customizable
           default: ["user"]
         },
       },

@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 let UserModel;
+const defaultRoles = ["user", "admin"];
 
 /** Base schema with default fields + validations */
 const baseFields = {
@@ -27,8 +28,8 @@ const baseFields = {
   passwordResetExpires: { type: Date },
   roles: {
     type: [String],
-    enum: ["user", "admin"], // consumer can override via schema extension
-    default: "user"
+    enum: defaultRoles,
+    default: ["user"]
   },
   isDeleted: {
     type: Boolean,
@@ -40,10 +41,21 @@ const baseFields = {
 function createUserModel(extensionFields = {}, collectionName = "User") {
   if (UserModel) return UserModel; // avoid redefining
 
-  const schema = new mongoose.Schema({
+  const consumerRoles = (extensionFields.roles?.enum || [])
+    .filter(r => !defaultRoles.includes(r)); // avoid overriding core roles
+  const mergedRoles = [...defaultRoles, ...consumerRoles];
+
+  const schemaDef = {
     ...baseFields,
     ...extensionFields,
-  }, { timestamps: true });
+    roles: {
+      type: [String],
+      enum: mergedRoles,
+      default: ["user"],
+    },
+  };
+
+  const schema = new mongoose.Schema(schemaDef, { timestamps: true });
 
   UserModel = mongoose.models[collectionName] || mongoose.model(collectionName, schema);
   return UserModel;
