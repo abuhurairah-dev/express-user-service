@@ -34,4 +34,19 @@ router.delete(
   }
 );
 
+router.patch(
+  "/users/:id/roles",
+  authMiddleware,
+  roleMiddleware(["admin"]),
+  async (req, res) => {
+    try {
+      const { roles } = req.body;
+      const updatedUser = await UserService.updateUserRoles(req.params.id, roles);
+      res.json(updatedUser);
+    } catch (err) {
+      res.status(400).json({ error: err.message });
+    }
+  }
+);
+
 module.exports = router;

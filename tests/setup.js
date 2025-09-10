@@ -13,7 +13,7 @@ const fakeEmailProvider = {
 };
 
 const schemaExtension = {
-  role: { type: String, default: "user" },
+  roles: { type: String, enum: ["manager", "trainer"], default: "user" },
   age: { type: Number, min: 0 },
 }
 
